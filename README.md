@@ -1,7 +1,7 @@
 # DicomStitcher
 
-基于 Qt / VTK / ITK 的双视图 DICOM 查看与后续拼接实验项目。当前提供 Fixed / Moving 独立视图，可通过单选框切换轴向/冠状/矢状，鼠标交互滚轮切片、拖拽调窗宽窗位。出于兼容性未显示患者姓名/ID。
-
+基于 Qt / VTK / ITK 的双视图 DICOM 查看与后续拼接实验项目。
+![alt text](imgs/DicomStitcher.jpg)
 ## 技术栈
 - Qt 5.15 (Widgets, AUTOUIC/AUTOMOC)
 - VTK 9.2 (RenderingOpenGL2, ResliceImageViewer)
