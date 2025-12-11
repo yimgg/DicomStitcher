@@ -12,6 +12,7 @@
 
 #include <itkImage.h>
 #include <itkMetaDataObject.h>
+#include <itkTransform.h>
 
 #include <string>
 
@@ -50,6 +51,12 @@ private:
     vtkSmartPointer<vtkImageData> ItkToVtkImage(ImageType *image);
     std::string GetDicomValue(const itk::MetaDataDictionary &dict,
                               const std::string &tagKey) const;
+    ImageType::Pointer OrientToRAS(ImageType *image);
+    ImageType::Pointer ResampleToIsotropic(ImageType *image, double spacing = 1.0);
+    ImageType::Pointer ResampleToReference(ImageType *image,
+                                           ImageType *reference,
+                                           itk::Transform<double, 3> *transform);
+    itk::Point<double, 3> ComputeCenter(ImageType *image) const;
     void registerSliceObserver(vtkResliceImageViewer *viewer,
                                vtkSmartPointer<vtkCallbackCommand> &callback,
                                unsigned long &observerTag);
@@ -58,20 +65,25 @@ private:
                                      unsigned long eventId,
                                      void* clientData,
                                      void* callData);
+    void UpdateStatus(const QString &text, int progress = -1);
 
     Ui::Widget *ui;
-
-    // 单视图组件
+    
+    // 视图组件
     QVTKOpenGLNativeWidget *view_fixed;
     QVTKOpenGLNativeWidget *view_moving;
+    QVTKOpenGLNativeWidget *view_fusion;
     vtkGenericOpenGLRenderWindow *renderWindow_main;
     vtkGenericOpenGLRenderWindow *renderWindow_moving;
+    vtkGenericOpenGLRenderWindow *renderWindow_fusion;
     vtkSmartPointer<vtkResliceImageViewer> m_viewerMain;
     vtkSmartPointer<vtkResliceImageViewer> m_viewerMoving;
+    vtkSmartPointer<vtkResliceImageViewer> m_viewerFusion;
 
     // 角标
     vtkSmartPointer<vtkCornerAnnotation> m_annotMain;
     vtkSmartPointer<vtkCornerAnnotation> m_annotMoving;
+    vtkSmartPointer<vtkCornerAnnotation> m_annotFusion;
 
     // 回调
     vtkSmartPointer<vtkCallbackCommand> m_sliceCallback;
@@ -88,12 +100,21 @@ private:
     int m_movingSliceSagittal{0};
     bool m_fixedLoaded{false};
     bool m_movingLoaded{false};
+    double m_fusionOpacity{0.5};
 
     // DICOM 元数据缓存
     std::string m_patientName;
     std::string m_patientID;
     std::string m_patientNameMoving;
     std::string m_patientIDMoving;
+
+    // 预处理结果缓存
+    ImageType::Pointer m_fixedResampled;
+    ImageType::Pointer m_movingResampled;
+    ImageType::Pointer m_movingCoarseOnFixed;
+    vtkSmartPointer<vtkImageData> m_vtkFixed;
+    vtkSmartPointer<vtkImageData> m_vtkMoving;
+    vtkSmartPointer<vtkImageData> m_vtkFusion;
 
     void UpdateAnnotations();
     void setOrientation(Orientation orientation);
